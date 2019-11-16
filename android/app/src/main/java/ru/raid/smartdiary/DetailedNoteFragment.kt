@@ -7,11 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import kotlinx.android.synthetic.main.fragment_detailed_note.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.raid.smartdiary.db.AppDatabase
-import ru.raid.smartdiary.db.Note
+import ru.raid.smartdiary.db.Record
 
 
 class DetailedNoteFragment: Fragment() {
@@ -23,7 +22,7 @@ class DetailedNoteFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val noteId = arguments?.getLong(NOTE_ID) ?: throw IllegalStateException("Note id is not specified")
-        val noteDao = AppDatabase.getInstance(context!!).noteDao()
+        val noteDao = AppDatabase.getInstance(context!!).recordDao()
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             val note = noteDao.get(noteId)
@@ -33,18 +32,17 @@ class DetailedNoteFragment: Fragment() {
         }
     }
 
-    private fun bindNote(note: Note) {
-        noteImage.setImageBitmap(note.bitmap)
-        noteText.text = note.text
+    private fun bindNote(record: Record) {
+        // TODO
     }
 
     companion object {
         private const val NOTE_ID = "note_id"
 
-        fun forNote(note: Note): DetailedNoteFragment {
+        fun forNote(record: Record): DetailedNoteFragment {
             val fragment = DetailedNoteFragment()
             fragment.arguments = Bundle().apply {
-                putLong(NOTE_ID, note.id)
+                putLong(NOTE_ID, record.id)
             }
             return fragment
         }

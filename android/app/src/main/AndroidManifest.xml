@@ -4,6 +4,7 @@
     package="ru.raid.smartdiary">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature android:name="android.hardware.microphone" />
 

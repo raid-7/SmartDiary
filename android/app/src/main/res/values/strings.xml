@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Smart Diary</string>
 
-    <string name="camera_rationale">Camera is required to add a note</string>
-    <string name="camera_rationale_in_settings">Grant camera permission in settings to add a note</string>
-    <string name="camera_tap_explanation">Tap to take photo</string>
+    <string name="microphone_rationale">Microphone is required to add a record</string>
+    <string name="microphone_rationale_in_settings">Grant microphone permission in settings to add a record</string>
+    <string name="stop_recording_button">Stop recording</string>
 </resources>
