@@ -63,7 +63,7 @@ class AudioRecorderFragment : Fragment() {
             setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             outputFile = nextRandomFile()
             setOutputFile(outputFile!!.absolutePath)
-            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
             try {
                 prepare()

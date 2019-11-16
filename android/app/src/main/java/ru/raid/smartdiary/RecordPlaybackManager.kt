@@ -10,11 +10,11 @@ import kotlinx.coroutines.launch
 import ru.raid.smartdiary.db.Record
 import java.io.File
 
-typealias RecordPlaybackListener = (Long) -> Unit
+typealias RecordPlaybackListener = () -> Unit
 
 class RecordPlaybackManager(private val context: Context, private val scope: CoroutineScope) {
     private val mediaPlayer = MediaPlayer()
-    private var playingRecordId: Long? = null
+    private var playing: PlayingSound? = null
 
     private val listeners = mutableSetOf<RecordPlaybackListener>()
 
@@ -27,15 +27,20 @@ class RecordPlaybackManager(private val context: Context, private val scope: Cor
     }
 
     fun play(record: Record) {
-        val oldId = playingRecordId
+        val oldId = playing
+        if (oldId?.type == SoundType.EXTRA)
+            return
+
         if (oldId != null)
             stopPlaying()
 
-        if (oldId != record.id)
+        if (oldId?.id != record.id)
             startPlaying(record)
     }
 
-    fun isPlaying(record: Record) = playingRecordId == record.id
+    fun isPlaying(record: Record) = playing?.let {
+        it.type == SoundType.RECORD && it.id == record.id
+    } ?: false
 
     fun addListener(l: RecordPlaybackListener) {
         listeners.add(l)
@@ -45,8 +50,31 @@ class RecordPlaybackManager(private val context: Context, private val scope: Cor
         listeners.remove(l)
     }
 
+    fun playExtra(resourceId: Int) {
+        terminate()
+
+        playing = PlayingSound(SoundType.EXTRA)
+        scope.launch(Dispatchers.IO) {
+            mediaPlayer.apply {
+                setAudioAttributes(
+                        AudioAttributes.Builder()
+                                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .build()
+                )
+                setDataSource(context.resources.openRawResourceFd(resourceId))
+                prepare()
+                start()
+            }
+        }
+    }
+
+    fun terminate() {
+        if (playing != null)
+            stopPlaying()
+    }
+
     private fun startPlaying(record: Record) {
-        playingRecordId = record.id
+        playing = PlayingSound(SoundType.RECORD, record.id)
         scope.launch(Dispatchers.IO) {
             mediaPlayer.apply {
                 setAudioAttributes(
@@ -59,7 +87,7 @@ class RecordPlaybackManager(private val context: Context, private val scope: Cor
                 start()
             }
         }
-        triggerListeners(record.id)
+        triggerListeners()
     }
 
     private fun stopPlaying() {
@@ -67,15 +95,24 @@ class RecordPlaybackManager(private val context: Context, private val scope: Cor
             mediaPlayer.stop()
             mediaPlayer.reset()
         }
-        val recordId = playingRecordId
-        playingRecordId = null
-        if (recordId != null)
-            triggerListeners(recordId)
+        val currentPlaying = playing
+        playing = null
+        if (currentPlaying != null)
+            triggerListeners()
     }
 
-    private fun triggerListeners(recordId: Long) {
+    private fun triggerListeners() {
         listeners.forEach {
-            it(recordId)
+            it()
         }
     }
+
+    enum class SoundType {
+        RECORD, EXTRA
+    }
+
+    class PlayingSound(
+            val type: SoundType,
+            val id: Long? = null
+    )
 }

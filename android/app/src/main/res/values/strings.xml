@@ -4,4 +4,5 @@
     <string name="microphone_rationale">Microphone is required to add a record</string>
     <string name="microphone_rationale_in_settings">Grant microphone permission in settings to add a record</string>
     <string name="stop_recording_button">Stop recording</string>
+    <string name="network_error">Network error</string>
 </resources>

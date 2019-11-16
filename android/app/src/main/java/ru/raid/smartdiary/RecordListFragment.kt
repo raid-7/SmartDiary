@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_note_list.*
 import ru.raid.smartdiary.db.AppDatabase
@@ -19,7 +18,8 @@ class RecordListFragment : PermissionHelperFragment<RecordListFragment.Permissio
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recycleViewAdapter = RecordAdapter(::showDetailedView, RecordPlaybackManager(context!!, lifecycleScope))
+        val act = activity as MainActivity
+        val recycleViewAdapter = RecordAdapter(::showDetailedView, act.playbackManager)
         AppDatabase.getInstance(context!!).recordDao().getAll().observe(::getLifecycle) {
             recycleViewAdapter.records = it
         }
@@ -30,7 +30,7 @@ class RecordListFragment : PermissionHelperFragment<RecordListFragment.Permissio
             adapter = recycleViewAdapter
         }
 
-        addButton.setOnClickListener { showCamera() }
+        addButton.setOnClickListener { startRecording() }
     }
 
     private fun showDetailedView(record: Record) {
@@ -38,7 +38,7 @@ class RecordListFragment : PermissionHelperFragment<RecordListFragment.Permissio
         mainActivity?.showDetailedNote(record)
     }
 
-    private fun showCamera() {
+    private fun startRecording() {
         withPermissions(
             arrayOf(Manifest.permission.RECORD_AUDIO),
             R.string.microphone_rationale,

@@ -9,7 +9,7 @@ import java.util.*
 
 class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManager) : RecyclerView.ViewHolder(itemView) {
     private lateinit var currentRecord: Record
-    private val listener: RecordPlaybackListener = { id ->
+    private val listener: RecordPlaybackListener = {
         if (::currentRecord.isInitialized)
             bind(currentRecord)
     }
