@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">My Application</string>
+
+    <string name="camera_rationale">Camera is required to add a note</string>
+    <string name="camera_rationale_in_settings">Grant camera permission in settings to add a note</string>
+    <string name="camera_tap_explanation">Tap to take photo</string>
+</resources>
