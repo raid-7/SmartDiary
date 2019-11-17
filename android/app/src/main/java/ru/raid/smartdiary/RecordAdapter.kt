@@ -6,9 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.raid.smartdiary.db.Record
 
 
-typealias NoteSelectionListener = (Record) -> Unit
-
-class RecordAdapter(private val listener: NoteSelectionListener, private val playback: RecordPlaybackManager) :
+class RecordAdapter(private val playback: RecordPlaybackManager) :
     RecyclerView.Adapter<RecordViewHolder>() {
     var records: List<Record> = emptyList()
         set(value) {

@@ -6,5 +6,6 @@ data class AddRecordResponse(
         val happiness: Float,
         val sadness: Float,
         val anger: Float,
-        val fear: Float
+        val fear: Float,
+        val avatar_level: Int
 )

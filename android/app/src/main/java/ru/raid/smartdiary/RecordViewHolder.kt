@@ -4,6 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.note_card.view.*
 import ru.raid.smartdiary.db.Record
+import ru.raid.smartdiary.net.AddRecordResponse
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,6 +34,7 @@ class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManag
                         R.drawable.ic_play_circle_outline
                     }
             )
+            recordSmile.setImageResource(record.info?.let { getEmotionDrawable(it) } ?: 0)
         }
     }
 
@@ -42,5 +44,22 @@ class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManag
 
     private fun playAudio(record: Record) {
         playback.play(record)
+    }
+
+    companion object {
+        private val EMOTION_MAPPING = mapOf(
+                AddRecordResponse::anger to R.drawable.ic_em_angry,
+                AddRecordResponse::sadness to R.drawable.ic_em_sad,
+                AddRecordResponse::fear to R.drawable.ic_em_fear,
+                AddRecordResponse::happiness to R.drawable.ic_em_happy
+        )
+
+        private fun getEmotionDrawable(resp: AddRecordResponse): Int {
+            return EMOTION_MAPPING.map {
+                it.key.get(resp) to it.value
+            }.maxBy {
+                it.first
+            }?.second ?: EMOTION_MAPPING.values.first()
+        }
     }
 }

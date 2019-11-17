@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="bubble_close">0dp</dimen>
+    <dimen name="bubble_open">128dp</dimen>
+</resources>

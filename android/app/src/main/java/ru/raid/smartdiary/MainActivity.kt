@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -23,46 +24,55 @@ import kotlin.random.Random
 
 
 class MainActivity : FragmentActivity() {
-    private lateinit var _playbackManager: RecordPlaybackManager
-    val playbackManager: RecordPlaybackManager
-        get() = _playbackManager
+    lateinit var playbackManager: RecordPlaybackManager
+        private set
+
+    lateinit var talkIntentionManager: TalkIntentionManager
+        private set
+
+    val recordingOn: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>(false)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        _playbackManager = RecordPlaybackManager(this, lifecycleScope)
+        playbackManager = RecordPlaybackManager(this, lifecycleScope)
+        talkIntentionManager = TalkIntentionManager(this)
         pager.adapter = PagerAdapter(supportFragmentManager)
-    }
 
-    override fun onResume() {
-        super.onResume()
-
-        val mng = TalkIntentionManager(this)
-        mng.scheduleAlarmAlmostNow(::askForTalk)
-    }
-
-    fun showDetailedNote(record: Record) {
-        supportFragmentManager.popBackStack(DETAILED_NOTE_FRAGMENT, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentInfo, DetailedNoteFragment.forNote(record))
-                .addToBackStack(DETAILED_NOTE_FRAGMENT)
-                .commit()
+        recordingOn.observe(::getLifecycle) {
+            if (it) {
+                pager.currentItem = 1
+            }
+        }
     }
 
     fun startRecording() {
+        if (isDestroyed)
+            return
+
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragmentInfo, AudioRecorderFragment())
                 .addToBackStack(RECORDING_FRAGMENT)
                 .commit()
+        recordingOn.postValue(true)
+    }
+
+    fun stopRecording() {
+        supportFragmentManager.popBackStack(RECORDING_FRAGMENT, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     }
 
     fun onAudioReady(file: File) {
-        supportFragmentManager.popBackStack(RECORDING_FRAGMENT, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        recordingOn.postValue(false)
 
-        val noteDao = AppDatabase.getInstance(this).recordDao()
+        val recordDao = AppDatabase.getInstance(this).recordDao()
+        val metaDao = AppDatabase.getInstance(this).metaDao()
         lifecycleScope.launch(Dispatchers.IO) {
-            noteDao.insert(Record(0, file.absolutePath, Calendar.getInstance().timeInMillis))
+            val record = Record(0, file.absolutePath, Calendar.getInstance().timeInMillis, null)
+            val rowId = recordDao.insert(record)
+
             val userId = getUserId()
             if (userId == null) {
                 launch(Dispatchers.Main) {
@@ -77,14 +87,16 @@ class MainActivity : FragmentActivity() {
                 launch(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, R.string.network_error, Toast.LENGTH_SHORT).show()
                 }
+                return@launch
             }
-            // TODO smth with response
+
+            metaDao.insert(ru.raid.smartdiary.db.Metadata.AVATAR_LEVEL, response.avatar_level.toString())
+            recordDao.update(Record(rowId, record.soundPath, record.date, response))
         }
     }
 
     fun askForTalk() {
-        val sounds = arrayOf(R.raw.tts0, R.raw.tts1, R.raw.tts2)
-        playbackManager.playExtra(sounds[Random.nextInt(sounds.size)])
+        playbackManager.playExtra(ASK_SOUNDS[Random.nextInt(ASK_SOUNDS.size)])
         startRecording()
     }
 
@@ -96,7 +108,7 @@ class MainActivity : FragmentActivity() {
     private suspend fun getUserId(): Long? {
         val metaDao = AppDatabase.getInstance(this).metaDao()
         return withContext(lifecycleScope.coroutineContext + Dispatchers.IO) {
-            metaDao.atomicGet("user_id") {
+            metaDao.atomicGet(ru.raid.smartdiary.db.Metadata.USER_ID) {
                 val res = api.addUser(UUID.randomUUID().toString().substring(0..20)).execute()
                 res.body()?.uid?.toString()
             }
@@ -106,7 +118,7 @@ class MainActivity : FragmentActivity() {
     class PagerAdapter(fragmentManager: FragmentManager)
         : FragmentStatePagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         override fun getItem(position: Int) =
-                if (position == 0) {
+                if (position == 1) {
                     RecordListFragment()
                 } else {
                     AvatarFragment()
@@ -116,9 +128,9 @@ class MainActivity : FragmentActivity() {
     }
 
     companion object {
-        private val DETAILED_NOTE_FRAGMENT = "${MainActivity::class.java.canonicalName}.detailed_note_fragment"
         private val RECORDING_FRAGMENT = "${MainActivity::class.java.canonicalName}.recording_fragment"
         private val ACTION_START_RECORDING = "${MainActivity::class.java.canonicalName}.start_recording"
+        private val ASK_SOUNDS = arrayOf(R.raw.tts0, R.raw.tts1, R.raw.tts2)
 
         fun startRecordingIntent(context: Context) =
                 Intent(context, MainActivity::class.java).apply {

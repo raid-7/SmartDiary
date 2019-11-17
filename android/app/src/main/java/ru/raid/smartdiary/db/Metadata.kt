@@ -7,4 +7,9 @@ import androidx.room.PrimaryKey
 class Metadata(
         @PrimaryKey val name: String,
         val value: String
-)
+) {
+    companion object {
+        const val USER_ID = "user_id"
+        const val AVATAR_LEVEL = "avatar_level"
+    }
+}

@@ -10,6 +10,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Query
+import java.util.concurrent.TimeUnit
 
 interface Api {
     @POST("add_user")
@@ -32,6 +33,9 @@ private val retrofit = Retrofit.Builder()
                             level = HttpLoggingInterceptor.Level.BODY
                         }
                 )
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .callTimeout(0, TimeUnit.SECONDS)
+                .readTimeout(24, TimeUnit.SECONDS)
                 .build())
         .build()
 
