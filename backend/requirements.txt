@@ -1,0 +1,10 @@
+flask
+psycopg2
+scipy
+azure-cognitiveservices-speech
+azure-cognitiveservices-anomalydetector
+requests
+pandas
+msrest
+pydub
+cassandra-driver
