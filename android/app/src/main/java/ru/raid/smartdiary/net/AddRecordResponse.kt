@@ -9,7 +9,8 @@ data class AddRecordResponse(
         val sadness: Float,
         val anger: Float,
         val fear: Float,
-        val avatar_level: Int
+        val avatar_level: Int,
+        val text: String
 ) {
     @get:Ignore
     val normalizedAnger: Float

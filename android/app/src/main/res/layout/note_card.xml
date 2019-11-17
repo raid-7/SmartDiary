@@ -23,7 +23,7 @@
             android:layout_marginBottom="16dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_play_circle_outline"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/recordText"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,25 +33,39 @@
             style="@android:style/TextAppearance.Medium"
             android:layout_width="26dp"
             android:layout_height="26dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="21dp"
+            android:layout_marginTop="21dp"
+            android:layout_marginBottom="16dp"
             app:layout_constraintRight_toLeftOf="@id/recordDate"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.5"
+            app:layout_constraintBottom_toTopOf="@id/recordText"
             android:scaleType="centerInside"
             android:adjustViewBounds="true"
-            tools:src="@drawable/ic_add" />
+            tools:src="@drawable/ic_em_angry" />
 
         <TextView
             android:id="@+id/recordDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.5"
+            app:layout_constraintBottom_toTopOf="@id/recordText"
             tools:text="21.12.1995" />
+
+        <TextView android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  app:layout_constraintTop_toBottomOf="@id/playButton"
+                  app:layout_constraintBottom_toBottomOf="parent"
+                  tools:text="Test Text"
+                  android:id="@+id/recordText"
+                  android:layout_marginRight="16dp"
+                  android:layout_marginLeft="16dp"
+                  android:layout_marginBottom="16dp"
+                  app:layout_constraintVertical_bias="0"
+                  />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

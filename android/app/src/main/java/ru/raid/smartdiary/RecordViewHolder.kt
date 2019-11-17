@@ -35,6 +35,7 @@ class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManag
                     }
             )
             recordSmile.setImageResource(record.info?.let { getEmotionDrawable(it) } ?: 0)
+            recordText.text = record.info?.text ?: ""
         }
     }
 
