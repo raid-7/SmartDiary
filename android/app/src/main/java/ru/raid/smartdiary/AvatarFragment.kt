@@ -11,7 +11,12 @@ import kotlinx.android.synthetic.main.fragment_avatar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.raid.smartdiary.db.AppDatabase
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
+
+private fun clamp(value: Int, minV: Int, maxV: Int) =
+        max(min(value, maxV), minV)
 
 class AvatarFragment : PermissionHelperFragment<PermissionTag>(PermissionTag.values()) {
     private var bubbleVisible = false
@@ -26,7 +31,7 @@ class AvatarFragment : PermissionHelperFragment<PermissionTag>(PermissionTag.val
 
         val metaDao = AppDatabase.getInstance(context!!).metaDao()
         metaDao.getLiveMeta(ru.raid.smartdiary.db.Metadata.AVATAR_LEVEL).observe(::getLifecycle) {
-            val level = it?.toInt() ?: 0
+            val level = clamp(it?.toInt() ?: 0, 0, AVATARS.size - 1)
             avatarImageView.setImageResource(AVATARS[level])
         }
 
