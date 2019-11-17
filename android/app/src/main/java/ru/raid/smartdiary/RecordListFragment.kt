@@ -28,7 +28,7 @@ class RecordListFragment : PermissionHelperFragment<PermissionTag>(PermissionTag
         super.onViewCreated(view, savedInstanceState)
 
         val act = activity as MainActivity
-        val recycleViewAdapter = RecordAdapter(act.playbackManager)
+        val recycleViewAdapter = RecordAdapter(act.playbackManager, viewLifecycleOwner.lifecycleScope)
         AppDatabase.getInstance(context!!).recordDao().getAll().observe(::getLifecycle) {
             recycleViewAdapter.records = it
         }

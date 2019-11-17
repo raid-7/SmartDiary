@@ -4,10 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.raid.smartdiary.db.Record
 
 
-class RecordAdapter(private val playback: RecordPlaybackManager) :
+class RecordAdapter(private val playback: RecordPlaybackManager, private val scope: CoroutineScope) :
     RecyclerView.Adapter<RecordViewHolder>() {
     var records: List<Record> = emptyList()
         set(value) {
@@ -33,7 +36,11 @@ class RecordAdapter(private val playback: RecordPlaybackManager) :
     }
 
     private fun applyChanges(old: List<Record>, new: List<Record>) {
-        val diff = DiffUtil.calculateDiff(RecordDiffCallback(old, new), true)
-        diff.dispatchUpdatesTo(this)
+        scope.launch(Dispatchers.IO) {
+            val diff = DiffUtil.calculateDiff(RecordDiffCallback(old, new), true)
+            launch(Dispatchers.Main) {
+                diff.dispatchUpdatesTo(this@RecordAdapter)
+            }
+        }
     }
 }

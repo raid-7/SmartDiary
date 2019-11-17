@@ -1,13 +1,8 @@
 package ru.raid.smartdiary
 
-import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.note_card.view.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import ru.raid.smartdiary.db.AppDatabase
 import ru.raid.smartdiary.db.Record
 import ru.raid.smartdiary.net.AddRecordResponse
 import java.text.SimpleDateFormat
