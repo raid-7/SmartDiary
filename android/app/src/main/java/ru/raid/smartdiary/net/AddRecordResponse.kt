@@ -1,5 +1,7 @@
 package ru.raid.smartdiary.net
 
+import androidx.room.Ignore
+
 data class AddRecordResponse(
         val score: Float,
         val neutrality: Float,
@@ -8,4 +10,8 @@ data class AddRecordResponse(
         val anger: Float,
         val fear: Float,
         val avatar_level: Int
-)
+) {
+    @get:Ignore
+    val normalizedAnger: Float
+        get() = anger * (1.0f - score)
+}

@@ -7,7 +7,7 @@ import ru.raid.smartdiary.net.AddRecordResponse
 
 
 @Entity(tableName = "records")
-class Record(
+data class Record(
         @PrimaryKey(autoGenerate = true) val id: Long,
         val soundPath: String,
         val date: Long,

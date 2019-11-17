@@ -1,10 +1,7 @@
 package ru.raid.smartdiary.db
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 
 @Dao
 interface RecordDao {
@@ -13,6 +10,9 @@ interface RecordDao {
 
     @Update
     suspend fun update(record: Record)
+
+    @Delete
+    suspend fun delete(record: Record)
 
     @Query("SELECT * FROM records")
     fun getAll(): LiveData<List<Record>>

@@ -8,8 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_note_list.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.raid.smartdiary.db.AppDatabase
 
 class RecordListFragment : PermissionHelperFragment<PermissionTag>(PermissionTag.values()) {
@@ -33,6 +38,20 @@ class RecordListFragment : PermissionHelperFragment<PermissionTag>(PermissionTag
             recycledViewPool.setMaxRecycledViews(0, 10)
             adapter = recycleViewAdapter
         }
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val holder = (viewHolder as? RecordViewHolder) ?: return
+                val record = holder.currentRecord
+                val recordDao = AppDatabase.getInstance(context!!).recordDao()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    recordDao.delete(record)
+                }
+            }
+        }).attachToRecyclerView(notesList)
 
         addButton.setOnClickListener {
             if (act.recordingOn.value != true)

@@ -19,6 +19,7 @@ import ru.raid.smartdiary.db.AppDatabase
 import ru.raid.smartdiary.db.Record
 import ru.raid.smartdiary.net.api
 import java.io.File
+import java.io.IOException
 import java.util.*
 import kotlin.random.Random
 
@@ -72,21 +73,31 @@ class MainActivity : FragmentActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             val record = Record(0, file.absolutePath, Calendar.getInstance().timeInMillis, null)
             val rowId = recordDao.insert(record)
+            val rollback: suspend () -> Unit = {
+                recordDao.delete(Record(rowId, record.soundPath, record.date, null))
+            }
 
             val userId = getUserId()
             if (userId == null) {
                 launch(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, R.string.network_error, Toast.LENGTH_SHORT).show()
                 }
+                rollback()
                 return@launch
             }
 
             val body = MultipartBody.Part.createFormData("data", file.name, RequestBody.create(null, file))
-            val response = api.addRecord(userId, body).execute().body()
+            val response = try {
+                api.addRecord(userId, body).execute().body()
+            } catch (exc: IOException) {
+                exc.printStackTrace()
+                null
+            }
             if (response == null) {
                 launch(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, R.string.network_error, Toast.LENGTH_SHORT).show()
                 }
+                rollback()
                 return@launch
             }
 
@@ -109,8 +120,13 @@ class MainActivity : FragmentActivity() {
         val metaDao = AppDatabase.getInstance(this).metaDao()
         return withContext(lifecycleScope.coroutineContext + Dispatchers.IO) {
             metaDao.atomicGet(ru.raid.smartdiary.db.Metadata.USER_ID) {
-                val res = api.addUser(UUID.randomUUID().toString().substring(0..20)).execute()
-                res.body()?.uid?.toString()
+                try {
+                    val res = api.addUser(UUID.randomUUID().toString().substring(0..20)).execute()
+                    res.body()?.uid?.toString()
+                } catch (exc: IOException) {
+                    exc.printStackTrace()
+                    null
+                }
             }
         }?.toLong()
     }

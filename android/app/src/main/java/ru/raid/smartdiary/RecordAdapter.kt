@@ -2,6 +2,7 @@ package ru.raid.smartdiary
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.raid.smartdiary.db.Record
 
@@ -10,8 +11,9 @@ class RecordAdapter(private val playback: RecordPlaybackManager) :
     RecyclerView.Adapter<RecordViewHolder>() {
     var records: List<Record> = emptyList()
         set(value) {
+            val old = field
             field = value
-            notifyDataSetChanged()
+            applyChanges(old, value)
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecordViewHolder {
@@ -28,5 +30,10 @@ class RecordAdapter(private val playback: RecordPlaybackManager) :
     override fun onViewRecycled(holder: RecordViewHolder) {
         super.onViewRecycled(holder)
         holder.recycle()
+    }
+
+    private fun applyChanges(old: List<Record>, new: List<Record>) {
+        val diff = DiffUtil.calculateDiff(RecordDiffCallback(old, new), true)
+        diff.dispatchUpdatesTo(this)
     }
 }

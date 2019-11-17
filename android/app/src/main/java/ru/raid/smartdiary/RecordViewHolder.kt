@@ -1,15 +1,20 @@
 package ru.raid.smartdiary
 
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.note_card.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import ru.raid.smartdiary.db.AppDatabase
 import ru.raid.smartdiary.db.Record
 import ru.raid.smartdiary.net.AddRecordResponse
 import java.text.SimpleDateFormat
 import java.util.*
 
 class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManager) : RecyclerView.ViewHolder(itemView) {
-    private lateinit var currentRecord: Record
+    lateinit var currentRecord: Record
     private val listener: RecordPlaybackListener = {
         if (::currentRecord.isInitialized)
             bind(currentRecord)
@@ -19,10 +24,10 @@ class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManag
         itemView.setOnClickListener {
             playAudio(currentRecord)
         }
-        playback.addListener(listener)
     }
 
     fun bind(record: Record) {
+        playback.addListener(listener)
         currentRecord = record
         val dateFormat = SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT)
         with(itemView) {
@@ -48,7 +53,7 @@ class RecordViewHolder(itemView: View, private val playback: RecordPlaybackManag
 
     companion object {
         private val EMOTION_MAPPING = mapOf(
-                AddRecordResponse::anger to R.drawable.ic_em_angry,
+                AddRecordResponse::normalizedAnger to R.drawable.ic_em_angry,
                 AddRecordResponse::sadness to R.drawable.ic_em_sad,
                 AddRecordResponse::fear to R.drawable.ic_em_fear,
                 AddRecordResponse::happiness to R.drawable.ic_em_happy
